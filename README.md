@@ -135,14 +135,12 @@
   .empty-inv { text-align: center; color: #5a6070; font-size: 13px; padding: 24px; }
 
   .welcome-overlay { position: fixed; inset: 0; background: radial-gradient(circle at center, rgba(255,140,0,0.25) 0%, rgba(0,0,0,0.92) 70%); display: flex; align-items: center; justify-content: center; z-index: 200; padding: 20px; }
-  .welcome-card { background: linear-gradient(160deg, #1e222e 0%, #16181f 100%); border: 2px solid rgba(255,217,59,0.5); border-radius: 24px; padding: 40px 32px; max-width: 420px; width: 100%; text-align: center; box-shadow: 0 0 60px rgba(255,140,0,0.5), 0 0 120px rgba(255,140,0,0.2); animation: welcomePop 0.6s cubic-bezier(0.2, 0.9, 0.3, 1.3); }
-  @keyframes welcomePop { 0% { transform: scale(0.5); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
-  .welcome-emoji { font-size: 72px; margin-bottom: 16px; display: inline-block; animation: bounce 1.6s ease-in-out infinite; }
-  @keyframes bounce { 0%,100% { transform: translateY(0) rotate(-5deg); } 50% { transform: translateY(-12px) rotate(5deg); } }
+  .welcome-card { background: linear-gradient(160deg, #1e222e 0%, #16181f 100%); border: 2px solid rgba(255,217,59,0.5); border-radius: 24px; padding: 40px 32px; max-width: 420px; width: 100%; text-align: center; box-shadow: 0 0 60px rgba(255,140,0,0.5); }
+  .welcome-emoji { font-size: 72px; margin-bottom: 16px; display: inline-block; }
   .welcome-title { font-size: 28px; font-weight: 900; margin-bottom: 12px; background: linear-gradient(135deg, #ffd93b 0%, #ff8c00 50%, #ff4d94 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
   .welcome-text { font-size: 15px; color: #b8bcc8; margin-bottom: 24px; line-height: 1.6; }
-  .welcome-bonus { display: inline-flex; align-items: center; gap: 10px; background: linear-gradient(135deg, rgba(255,217,59,0.25) 0%, rgba(255,140,0,0.15) 100%); border: 2px solid #ffd93b; border-radius: 14px; padding: 14px 24px; font-size: 22px; font-weight: 900; color: #ffd93b; margin-bottom: 24px; box-shadow: 0 0 30px rgba(255,217,59,0.5); }
-  .welcome-btn { background: linear-gradient(135deg, #ffd93b 0%, #ff8c00 100%); color: #1a1d28; border: none; padding: 16px 40px; border-radius: 14px; font-size: 16px; font-weight: 900; cursor: pointer; font-family: inherit; box-shadow: 0 8px 30px rgba(255,140,0,0.5); }
+  .welcome-bonus { display: inline-block; background: linear-gradient(135deg, rgba(255,217,59,0.25) 0%, rgba(255,140,0,0.15) 100%); border: 2px solid #ffd93b; border-radius: 14px; padding: 14px 24px; font-size: 22px; font-weight: 900; color: #ffd93b; margin-bottom: 24px; }
+  .welcome-btn { background: linear-gradient(135deg, #ffd93b 0%, #ff8c00 100%); color: #1a1d28; border: none; padding: 16px 40px; border-radius: 14px; font-size: 16px; font-weight: 900; cursor: pointer; font-family: inherit; }
 </style>
 </head>
 <body>
@@ -206,11 +204,9 @@
     </div>
     <button class="close-btn" id="closeBtn">✕</button>
   </div>
-
   <div class="roulette-wrap">
     <canvas id="rouletteCanvas"></canvas>
   </div>
-
   <div class="bottom">
     <button class="help-btn" id="helpBtn">?</button>
     <button class="bonus-btn" id="bonusBtn">Бонусы</button>
@@ -253,7 +249,7 @@ var PROMOS = {
   "#mrtPromBalanc2":  { type: "lightning", amount: 2,  max: 2, label: "2 молнии" }
 };
 
-var SAVE_KEY = "nekitsave_v5";
+var SAVE_KEY = "nekitsave_v6";
 var TG_URL   = "https://t.me/ymarat123tube";
 var TTK_URL  = "https://www.tiktok.com/@k0tenok500";
 
@@ -279,7 +275,7 @@ function load() {
     var raw = localStorage.getItem(SAVE_KEY);
     if (raw) {
       var d = JSON.parse(raw);
-      for (var k in d) state[k] = d[k];
+      for (var k in d) { state[k] = d[k]; }
     }
     if (!state.promosUsed) state.promosUsed = {};
   } catch(e) {}
@@ -294,7 +290,11 @@ function rollCharacter() {
   }
   return CHARACTERS[CHARACTERS.length - 1];
 }
-function fmtDollars(n) { return "$ " + (Math.round(n * 10) / 10).toFixed(1); }
+
+function fmtDollars(n) {
+  return "$ " + (Math.round(n * 10) / 10).toFixed(1);
+}
+
 function timeUntilDaily() {
   var now = Math.floor(Date.now() / 1000);
   return Math.max(86400 - (now - state.lastDaily), 0);
@@ -334,7 +334,6 @@ function buildChances() {
   }
   list.appendChild(frag);
 }
-buildChances();
 
 var ITEM_W = 120, ITEM_H = 160, ITEM_GAP = 8;
 var STRIDE = ITEM_W + ITEM_GAP;
@@ -828,35 +827,12 @@ function showWelcome() {
   overlay.appendChild(card);
   document.body.appendChild(overlay);
 
-  var confettiColors = ["#ffd93b","#ff8c00","#ff4d94","#4dff88","#4d9fff","#c04dff"];
-  var confettiPieces = [];
-  for (var i = 0; i < 40; i++) {
-    var p = document.createElement("div");
-    p.className = "confetti";
-    p.style.left = (Math.random() * 100) + "vw";
-    p.style.background = confettiColors[Math.floor(Math.random() * confettiColors.length)];
-    p.style.animationDuration = (2 + Math.random() * 2) + "s";
-    p.style.animationDelay = (Math.random() * 0.8) + "s";
-    p.style.width = (6 + Math.random() * 8) + "px";
-    p.style.height = (6 + Math.random() * 8) + "px";
-    p.style.borderRadius = Math.random() > 0.5 ? "50%" : "2px";
-    document.body.appendChild(p);
-    confettiPieces.push(p);
-  }
-
-  var cleanup = function() {
-    for (var k = 0; k < confettiPieces.length; k++) {
-      if (confettiPieces[k].parentNode) confettiPieces[k].parentNode.removeChild(confettiPieces[k]);
-    }
-  };
-
   card.querySelector("#welcomeOk").addEventListener("click", function() {
     state.welcomed = true;
     state.lightning += 1;
     saveNow();
     updateCurrency();
     overlay.remove();
-    cleanup();
   });
 }
 
@@ -888,6 +864,8 @@ function exitGame() {
     rafId = null;
   }
 }
+
+buildChances();
 
 el.playBtn.addEventListener("click", enterGame);
 el.profileBtn.addEventListener("click", openProfile);
